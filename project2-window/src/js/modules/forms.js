@@ -3,7 +3,8 @@ import checkNumInputs from "./checkNumInputs";
 const forms = (state) => {
   const form = document.querySelectorAll("form"),
     inputs = document.querySelectorAll("input");
-  //виклик ф-ції валідації чи цифра з модуля checkNumbers
+
+  // виклик ф-ції валідації чи цифра з модуля checkNumbers
   checkNumInputs('input[name ="user_phone"]');
 
   const message = {
@@ -11,7 +12,23 @@ const forms = (state) => {
     success: "Дякую! Ми зв'яжемося з Вами найближчим часом!",
     failure: "Щось пішло не так...",
   };
+
+  const saveFormDataToLocalStorage = (formData) => {
+    // Отримання поточних даних з localStorage
+    const dataFromLocalStorage =
+      JSON.parse(localStorage.getItem("formData")) || {};
+    // Перетворення FormData у об'єкт
+    const data = Object.fromEntries(formData.entries ? formData.entries() : []);
+    // Додавання нових даних до старих
+    const updatedData = Object.assign({}, dataFromLocalStorage, data);
+    // Збереження оновлених даних в localStorage
+    localStorage.setItem("formData", JSON.stringify(updatedData));
+  };
+
   const postData = async (url, data) => {
+    // Save form data to local storage
+    saveFormDataToLocalStorage(data);
+
     document.querySelector(".status").textContent = message.loading;
     let res = await fetch(url, {
       method: "POST",
@@ -19,6 +36,7 @@ const forms = (state) => {
     });
     return await res.text();
   };
+
   const clearInputs = () => {
     inputs.forEach((item) => {
       item.value = "";
@@ -31,15 +49,18 @@ const forms = (state) => {
       let statusMessage = document.createElement("div");
       statusMessage.classList.add("status");
       item.appendChild(statusMessage);
-
       const formData = new FormData(item);
+
       if (item.getAttribute("data-calc") === "end") {
         for (let key in state) {
-          formData.append(key,state[key]);
+          formData.append(key, state[key]);
         }
       }
 
-      //відправка запиту
+      // збереження даних в localStorage
+      saveFormDataToLocalStorage(formData);
+
+      // відправка запиту
       postData("assets/server.php", formData)
         .then((res) => {
           console.log(res);
@@ -55,4 +76,7 @@ const forms = (state) => {
     });
   });
 };
+
 export default forms;
+
+
