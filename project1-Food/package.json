@@ -11,5 +11,8 @@
   "devDependencies": {
     "json-server": "^0.17.3",
     "webpack-cli": "^5.0.1"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
   }
 }
